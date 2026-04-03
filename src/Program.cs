@@ -34,24 +34,17 @@ var readTool = ChatTool.CreateFunctionTool(
     functionParameters: BinaryData.FromBytes(
         """
         {
-          "type": "function",
-          "function": {
-            "name": "Read",
-            "description": "Read and return the contents of a file",
-            "parameters": {
-              "type": "object",
-              "properties": {
-                "file_path": {
-                  "type": "string",
-                  "description": "The path to the file to read"
-                }
-              },
-              "required": ["file_path"]
+          "type": "object",
+          "properties": {
+            "file_path": {
+              "type": "string",
+              "description": "The path to the file to read"
             }
-          }
+          },
+          "required": ["file_path"]
         }
         """u8.ToArray())
-    );
+);
 
 ChatCompletionOptions tools = new() { Tools = { readTool } };
 ChatMessage[] messages = [new UserChatMessage(prompt)];
