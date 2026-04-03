@@ -64,5 +64,21 @@ if (response.Content == null || response.Content.Count == 0)
 // You can use print statements as follows for debugging, they'll be visible when running tests.
 Console.Error.WriteLine("Logs from your program will appear here!");
 
-// TODO: Uncomment the line below to pass the first stage
-Console.Write(response.Content[0].Text);
+var tool_calls = response.Content[0].ToolCalls;
+if (tool_calls != null && tool_calls.Count > 0)
+{
+    var tool_call = tool_calls[0];
+    var tool_call_function_name = tool_call_function.Name;
+    var tool_call_function_arguments = tool_call_function.Arguments;
+    if (tool_call_function_name == "Read") 
+    {
+        var file_path = tool_call_function_arguments["file_path"];
+        var file_content = File.ReadAllText(file_path);
+        Console.Write(file_content);
+    }
+}
+else
+{
+    Console.Write(response.Content[0].Text);
+}
+
