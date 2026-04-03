@@ -1,6 +1,7 @@
 using OpenAI;
 using OpenAI.Chat;
 using System.ClientModel;
+using System.Text.Json;
 
 if (args.Length < 2 || args[0] != "-p")
 {
@@ -64,20 +65,20 @@ if (response.Content == null || response.Content.Count == 0)
 // You can use print statements as follows for debugging, they'll be visible when running tests.
 Console.Error.WriteLine("Logs from your program will appear here!");
 
-var tool_calls = response.Content[0].ToolCalls;
+var tool_calls = response.ToolCalls;
 if (tool_calls != null && tool_calls.Count > 0)
 {
     var tool_call = tool_calls[0];
-    var tool_call_function_name = tool_call_function.Name;
-    var tool_call_function_arguments = tool_call_function.Arguments;
+    var tool_call_function_name = tool_call.function.Name;
     if (tool_call_function_name == "Read") 
     {
-        var file_path = tool_call_function_arguments["file_path"];
+        var argsDoc = JsonDocument.Parse(tool_call.FunctionArguments);
+        var file_path = argsDoc.RootElement.GetProperty("file_path").GetString();
         var file_content = File.ReadAllText(file_path);
         Console.Write(file_content);
     }
 }
-else
+else if (response.Content != null && response.Content.Count > 0)
 {
     Console.Write(response.Content[0].Text);
 }
