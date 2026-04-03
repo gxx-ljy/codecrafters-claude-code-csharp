@@ -69,7 +69,7 @@ var tool_calls = response.ToolCalls;
 if (tool_calls != null && tool_calls.Count > 0)
 {
     var tool_call = tool_calls[0];
-    var tool_call_function_name = tool_call.function.Name;
+    var tool_call_function_name = tool_call.FunctionName;
     if (tool_call_function_name == "Read") 
     {
         var argsDoc = JsonDocument.Parse(tool_call.FunctionArguments);
