@@ -87,7 +87,7 @@ var bashTool = ChatTool.CreateFunctionTool(
     )
 );
 
-ChatCompletionOptions tools = new() { Tools = { readTool, writeTool } };
+ChatCompletionOptions tools = new() { Tools = { readTool, writeTool, bashTool } };
 ChatMessage[] messages = [new UserChatMessage(prompt)];
 
 // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -105,6 +105,8 @@ while (true)
             {
                 var argsDoc = JsonDocument.Parse(tool_call.FunctionArguments);
                 var file_path = argsDoc.RootElement.GetProperty("file_path").GetString();
+                if (file_path == null)
+                    throw new ArgumentNullException(nameof(file_path));
                 var file_content = File.ReadAllText(file_path);
                 // Console.Write(file_content);
                 // 添加工具响应到对话历史
@@ -114,6 +116,8 @@ while (true)
             {
                 var argsDoc = JsonDocument.Parse(tool_call.FunctionArguments);
                 var file_path = argsDoc.RootElement.GetProperty("file_path").GetString();
+                if (file_path == null)
+                    throw new ArgumentNullException(nameof(file_path));
                 var content = argsDoc.RootElement.GetProperty("content").GetString();
                 File.WriteAllText(file_path, content);
                 messages = messages.Append(new ToolChatMessage(tool_call.Id, "OK")).ToArray();
