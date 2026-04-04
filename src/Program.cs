@@ -46,7 +46,29 @@ var readTool = ChatTool.CreateFunctionTool(
         """u8.ToArray())
 );
 
-ChatCompletionOptions tools = new() { Tools = { readTool } };
+var writeTool = ChatTool.CreateFunctionTool(
+    functionName: "Write",
+    functionParameters: BinaryData.FromBytes(
+        """
+        {
+            "type": "object",
+            "required": ["file_path", "content"],
+            "properties": {
+                "file_path": {
+                "type": "string",
+                "description": "The path of the file to write to"
+                },
+                "content": {
+                "type": "string",
+                "description": "The content to write to the file"
+                }
+            }
+        }
+        """u8.ToArray()
+    )
+);
+
+ChatCompletionOptions tools = new() { Tools = { readTool, writeTool } };
 ChatMessage[] messages = [new UserChatMessage(prompt)];
 
 // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -68,6 +90,14 @@ while (true)
                 // Console.Write(file_content);
                 // 添加工具响应到对话历史
                 messages = messages.Append(new ToolChatMessage(tool_call.Id, file_content)).ToArray();
+            }
+            else if (tool_call_function_name == "Write") 
+            {
+                var argsDoc = JsonDocument.Parse(tool_call.FunctionArguments);
+                var file_path = argsDoc.RootElement.GetProperty("file_path").GetString();
+                var content = argsDoc.RootElement.GetProperty("content").GetString();
+                File.WriteAllText(file_path, content);
+                messages = messages.Append(new ToolChatMessage(tool_call.Id, "OK")).ToArray();
             }
         }
     }
