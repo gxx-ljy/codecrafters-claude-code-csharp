@@ -53,18 +53,21 @@ ChatCompletion response = client.CompleteChat(messages, tools);
 // You can use print statements as follows for debugging, they'll be visible when running tests.
 Console.Error.WriteLine("Logs from your program will appear here!");
 
+messages = messages.Append(new AssistantChatMessage(response)).ToArray();
 var tool_calls = response.ToolCalls;
 if (tool_calls != null && tool_calls.Count > 0)
 {
-    var tool_call = tool_calls[0];
-    var tool_call_function_name = tool_call.FunctionName;
-    if (tool_call_function_name == "Read") 
-    {
-        var argsDoc = JsonDocument.Parse(tool_call.FunctionArguments);
-        var file_path = argsDoc.RootElement.GetProperty("file_path").GetString();
-        var file_content = File.ReadAllText(file_path);
-        Console.Write(file_content);
-    }
+    foreach (var tool_call in tool_calls)
+        var tool_call_function_name = tool_call.FunctionName;
+        if (tool_call_function_name == "Read") 
+        {
+            var argsDoc = JsonDocument.Parse(tool_call.FunctionArguments);
+            var file_path = argsDoc.RootElement.GetProperty("file_path").GetString();
+            var file_content = File.ReadAllText(file_path);
+            // Console.Write(file_content);
+            // 添加工具响应到对话历史
+            messages = messages.Append(new ToolChatMessage(tool_call.Id, file_content)).ToArray();
+        }
 }
 else if (response.Content != null && response.Content.Count > 0)
 {
