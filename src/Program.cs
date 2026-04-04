@@ -68,6 +68,24 @@ var writeTool = ChatTool.CreateFunctionTool(
     )
 );
 
+var bashTool = ChatTool.CreateFunctionTool(
+    functionName: "bash",
+    functionParameters: BinaryData.FromBytes(
+        """
+        {
+            "type": "object",
+            "required": ["command"],
+            "properties": {
+                "command": {
+                "type": "string",
+                "description": "The command to execute"
+                }
+            }
+        }
+        """u8.ToArray()
+    )
+);
+
 ChatCompletionOptions tools = new() { Tools = { readTool, writeTool } };
 ChatMessage[] messages = [new UserChatMessage(prompt)];
 
@@ -98,6 +116,20 @@ while (true)
                 var content = argsDoc.RootElement.GetProperty("content").GetString();
                 File.WriteAllText(file_path, content);
                 messages = messages.Append(new ToolChatMessage(tool_call.Id, "OK")).ToArray();
+            }
+            else if (tool_call_function_name == "Bash")
+            {
+                var argsDoc = JsonDocument.Parse(tool_call.FunctionArguments);
+                var command = argsDoc.RootElement.GetProperty("command").GetString();
+                var output = Process.Start(new ProcessStartInfo
+                {
+                    FileName = "bash",
+                    Arguments = $"-c \"{command}\"",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                })?.StandardOutput.ReadToEnd();
+                messages = messages.Append(new ToolChatMessage(tool_call.Id, output)).ToArray();
             }
         }
     }
