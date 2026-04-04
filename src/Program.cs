@@ -2,6 +2,7 @@ using OpenAI;
 using OpenAI.Chat;
 using System.ClientModel;
 using System.Text.Json;
+using System.Diagnostics;
 
 if (args.Length < 2 || args[0] != "-p")
 {
