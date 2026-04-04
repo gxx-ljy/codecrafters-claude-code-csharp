@@ -57,9 +57,8 @@ while (true)
     ChatCompletion response = client.CompleteChat(messages, tools);
     messages = messages.Append(new AssistantChatMessage(response)).ToArray();
     var tool_calls = response.ToolCalls;
-    if (tool_calls != null && tool_calls.Count > 0)
-    {
-        foreach (var tool_call in tool_calls)
+    if (tool_calls != null && tool_calls.Count > 0) {
+        foreach (var tool_call in tool_calls) {
             var tool_call_function_name = tool_call.FunctionName;
             if (tool_call_function_name == "Read") 
             {
@@ -70,9 +69,9 @@ while (true)
                 // 添加工具响应到对话历史
                 messages = messages.Append(new ToolChatMessage(tool_call.Id, file_content)).ToArray();
             }
+        }
     }
-    else 
-    {
+    else {
         Console.Write(response.Content[0].Text);
         break;
     }
