@@ -70,7 +70,7 @@ var writeTool = ChatTool.CreateFunctionTool(
 );
 
 var bashTool = ChatTool.CreateFunctionTool(
-    functionName: "bash",
+    functionName: "Bash",
     functionParameters: BinaryData.FromBytes(
         """
         {
@@ -128,7 +128,7 @@ while (true)
                 var command = argsDoc.RootElement.GetProperty("command").GetString();
                 var output = Process.Start(new ProcessStartInfo
                 {
-                    FileName = "bash",
+                    FileName = "/bin/bash",
                     Arguments = $"-c \"{command}\"",
                     RedirectStandardOutput = true,
                     UseShellExecute = false,
